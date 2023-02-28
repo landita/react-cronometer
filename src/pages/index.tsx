@@ -1,23 +1,27 @@
 import { Container, Flex, Title, Button, Group } from '@mantine/core';
+import { showNotification } from '@mantine/notifications';
 import {
   TbPlayerPlay,
   TbPlayerPause,
   TbPlayerStop,
   TbPlayerSkipForward,
+  TbShieldCheck,
 } from 'react-icons/tb';
 import { useEffect, useRef } from 'react';
+import Confetti from 'react-confetti';
+import { useWindowSize } from 'react-use';
 import { DisplayTime } from '../components/pages/home/DisplayTime';
 import { AlarmForm } from '../components/pages/home';
 import { watcherStore } from '../store';
 import '../styles/border-rainbow.css';
-import Confetti from 'react-confetti';
-import { useWindowSize } from 'react-use';
 
 const HomePage = () => {
   const {
     time,
     isActive,
     isAlarmActive,
+    willAlarmMatch,
+    setWillAlarmMatch,
     setTime,
     setInitialTime,
     setIsActive,
@@ -50,6 +54,27 @@ const HomePage = () => {
     return () => clearInterval(current);
   }, [isActive]);
 
+  useEffect(() => {
+    let { current } = ref;
+    if (willAlarmMatch) {
+      showNotification({
+        disallowClose: true,
+        autoClose: 5000,
+        title: `The alarm is throwing confetti?`,
+        message: 'How Hilarious',
+        icon: <TbShieldCheck />,
+        color: 'teal',
+        loading: false,
+      });
+      current = setInterval(() => {
+        setWillAlarmMatch(false);
+      }, 4000);
+    } else {
+      clearInterval(current);
+    }
+    return () => clearInterval(current);
+  }, [willAlarmMatch]);
+
   return (
     <Container
       fluid
@@ -61,6 +86,8 @@ const HomePage = () => {
         alignItems: 'center',
       }}
     >
+      {willAlarmMatch && <Confetti width={width} height={height} />}
+
       <Flex
         direction='column'
         justify='center'

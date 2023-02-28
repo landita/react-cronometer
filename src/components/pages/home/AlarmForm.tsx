@@ -1,4 +1,4 @@
-import { Button } from '@mantine/core';
+import { Button, Loader } from '@mantine/core';
 import { TimeInput } from '@mantine/dates';
 import { useForm, yupResolver } from '@mantine/form';
 import { showNotification } from '@mantine/notifications';
@@ -13,6 +13,7 @@ export const AlarmForm = () => {
     alarmInterval,
     isActive,
     isAlarmActive,
+    setWillAlarmMatch,
     setAlarmTime,
     setAlarmInterval,
     setIsAlarmActive,
@@ -28,63 +29,72 @@ export const AlarmForm = () => {
     validateInputOnChange: true,
     validateInputOnBlur: true,
   });
-  const ref = useRef({
-    interval: 0,
-    currentTime: 0,
-  });
+  const ref = useRef(0);
 
   useEffect(() => {
-    let { interval } = ref.current;
+    let { current } = ref;
     if (isAlarmActive) {
-      interval = setInterval(() => {
+      current = setInterval(() => {
         setAlarmInterval(new Date().getMilliseconds());
-        if (alarmTime % alarmInterval <= 50000) {
-          console.log('match');
+        if (alarmTime % alarmInterval <= 10000) {
+          clearInterval(current);
+          setAlarmInterval(new Date().getMilliseconds());
+          form.setFieldValue('time', new Date());
+          setWillAlarmMatch(true);
+          setIsAlarmActive(false);
         }
       }, 500);
     }
     return () => {
-      clearInterval(interval);
+      clearInterval(current);
     };
-  }, [isAlarmActive]);
+  }, [isAlarmActive, alarmTime, alarmInterval]);
 
   return (
-    <form
-      autoComplete='off'
-      onSubmit={form.onSubmit(({ time }) => {
-        setIsAlarmActive(true);
-        setAlarmTime(time.getTime());
-        showNotification({
-          disallowClose: true,
-          autoClose: 5000,
-          title: `The alarm was setup`,
-          message: 'Wait and see what happens',
-          icon: <TbCalendar />,
-          color: 'teal',
-          loading: false,
-        });
-      })}
-    >
-      <TimeInput
-        label='Set your own alarm'
-        withAsterisk
-        withSeconds
-        format='12'
-        amLabel='am'
-        pmLabel='pm'
-        hoursLabel='Hours'
-        minutesLabel='Minutes'
-        secondsLabel='Seconds'
-        clearable
-        icon={<TbClock size={16} />}
-        sx={{
-          width: '300px',
-        }}
-        {...form.getInputProps('time')}
-      />
-      <Button mt={20} type='submit' disabled={isAlarmActive || isActive}>
-        Set Alarm
-      </Button>
-    </form>
+    <>
+      <form
+        autoComplete='off'
+        onSubmit={form.onSubmit(({ time }) => {
+          setIsAlarmActive(true);
+          setAlarmTime(time.getTime());
+          showNotification({
+            disallowClose: true,
+            autoClose: 5000,
+            title: `The alarm was setup`,
+            message: 'Wait and see what happens',
+            icon: <TbCalendar />,
+            color: 'teal',
+            loading: false,
+          });
+        })}
+      >
+        <TimeInput
+          label='Set your own alarm'
+          withAsterisk
+          withSeconds
+          format='12'
+          amLabel='am'
+          pmLabel='pm'
+          hoursLabel='Hours'
+          minutesLabel='Minutes'
+          secondsLabel='Seconds'
+          clearable
+          icon={<TbClock size={16} />}
+          sx={{
+            width: '300px',
+          }}
+          {...form.getInputProps('time')}
+        />
+        <Button
+          rightIcon={<TbClock />}
+          mt={20}
+          type='submit'
+          disabled={isAlarmActive || isActive}
+        >
+          Set Alarm
+        </Button>
+      </form>
+      {isAlarmActive && <Loader />}
+    </>
   );
 };

@@ -9,6 +9,7 @@ export const watcherStore = create<Watcher>()(
     alarmTime: 0,
     alarmInterval: Date.now(),
     isAlarmActive: false,
+    willAlarmMatch: false,
 
     setTime: (interval: number) =>
       set((state) => ({ time: state.time + interval })),
@@ -20,5 +21,7 @@ export const watcherStore = create<Watcher>()(
     cleanAlarmInterval: (value: number) =>
       set(() => ({ alarmInterval: value })),
     setIsAlarmActive: (value: boolean) => set(() => ({ isAlarmActive: value })),
+    setWillAlarmMatch: (value: boolean) =>
+      set(() => ({ willAlarmMatch: value })),
   })),
 );

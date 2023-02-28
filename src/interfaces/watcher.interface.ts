@@ -4,6 +4,7 @@ export interface Watcher {
   alarmTime: number;
   alarmInterval: number;
   isAlarmActive: boolean;
+  willAlarmMatch: boolean;
   setTime: (interval: number) => void;
   setInitialTime: (interval: number) => void;
   setIsActive: (isActive: boolean) => void;
@@ -11,4 +12,5 @@ export interface Watcher {
   setAlarmInterval: (value: number) => void;
   cleanAlarmInterval: (value: number) => void;
   setIsAlarmActive: (value: boolean) => void;
+  setWillAlarmMatch: (value: boolean) => void;
 }
