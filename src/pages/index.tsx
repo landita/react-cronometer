@@ -16,25 +16,16 @@ import { useWindowSize } from 'react-use';
 const HomePage = () => {
   const {
     time,
-    alarmTime,
-    alarmInterval,
     isActive,
     isAlarmActive,
     setTime,
     setInitialTime,
     setIsActive,
-    setAlarmTime,
-    setAlarmInterval,
-    setIsAlarmActive,
   } = watcherStore((state) => state);
 
   const { width, height } = useWindowSize();
 
-  const ref = useRef({
-    timer1: 0,
-    timer2: 0,
-    willAlarmMatch: false,
-  });
+  const ref = useRef(0);
 
   const onStart = () => {
     setIsActive(true);
@@ -48,40 +39,16 @@ const HomePage = () => {
   };
 
   useEffect(() => {
-    let { timer1 } = ref.current;
+    let { current } = ref;
     if (isActive) {
-      timer1 = setInterval(() => {
+      current = setInterval(() => {
         setTime(10);
       }, 10);
     } else {
-      clearInterval(timer1);
+      clearInterval(current);
     }
-    return () => clearInterval(timer1);
+    return () => clearInterval(current);
   }, [isActive]);
-
-  useEffect(() => {
-    let { timer2 } = ref.current;
-    if (isAlarmActive) {
-      timer2 = setInterval(() => {
-        setAlarmInterval(10);
-      }, 5);
-      if (alarmTime - alarmInterval <= 10000) {
-        clearInterval(timer2);
-        ref.current.willAlarmMatch = true;
-        setAlarmTime(0);
-        setAlarmInterval(Date.now());
-        timer2 = setInterval(() => {
-          setIsAlarmActive(false);
-        }, 2000);
-        ref.current.willAlarmMatch = false;
-
-        clearInterval(timer2);
-      }
-    } else {
-      clearInterval(timer2);
-    }
-    return () => clearInterval(timer2);
-  }, [isAlarmActive, alarmInterval, alarmTime]);
 
   return (
     <Container
@@ -94,9 +61,6 @@ const HomePage = () => {
         alignItems: 'center',
       }}
     >
-      {ref.current.willAlarmMatch && (
-        <Confetti width={width} height={height} tweenDuration={2000} />
-      )}
       <Flex
         direction='column'
         justify='center'

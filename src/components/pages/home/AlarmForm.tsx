@@ -5,9 +5,12 @@ import { showNotification } from '@mantine/notifications';
 import { TbClock, TbCalendar } from 'react-icons/tb';
 import * as yup from 'yup';
 import { watcherStore } from '../../../store';
+import { useEffect, useRef } from 'react';
 
 export const AlarmForm = () => {
   const {
+    alarmTime,
+    alarmInterval,
     isActive,
     isAlarmActive,
     setAlarmTime,
@@ -25,18 +28,32 @@ export const AlarmForm = () => {
     validateInputOnChange: true,
     validateInputOnBlur: true,
   });
-  const onReset = () => {
-    setAlarmTime(0);
-    setAlarmInterval(Date.now());
-    setIsAlarmActive(false);
-  };
+  const ref = useRef({
+    interval: 0,
+    currentTime: 0,
+  });
+
+  useEffect(() => {
+    let { interval } = ref.current;
+    if (isAlarmActive) {
+      interval = setInterval(() => {
+        setAlarmInterval(new Date().getMilliseconds());
+        if (alarmTime % alarmInterval <= 50000) {
+          console.log('match');
+        }
+      }, 500);
+    }
+    return () => {
+      clearInterval(interval);
+    };
+  }, [isAlarmActive]);
 
   return (
     <form
       autoComplete='off'
       onSubmit={form.onSubmit(({ time }) => {
-        setAlarmTime(time.getTime());
         setIsAlarmActive(true);
+        setAlarmTime(time.getTime());
         showNotification({
           disallowClose: true,
           autoClose: 5000,
@@ -67,15 +84,6 @@ export const AlarmForm = () => {
       />
       <Button mt={20} type='submit' disabled={isAlarmActive || isActive}>
         Set Alarm
-      </Button>
-      <Button
-        mt={20}
-        ml={10}
-        type='button'
-        disabled={!isAlarmActive}
-        onClick={onReset}
-      >
-        Stop waiting
       </Button>
     </form>
   );
