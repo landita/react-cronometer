@@ -4,15 +4,11 @@ import { useForm, yupResolver } from '@mantine/form';
 import { showNotification } from '@mantine/notifications';
 import { TbClock, TbCalendar } from 'react-icons/tb';
 import * as yup from 'yup';
-import {
-  getHoursInMiliSeconds,
-  getMinutesInMiliSeconds,
-  getSecondsInMiliSeconds,
-} from '../../../helpers';
 import { watcherStore } from '../../../store';
 
 export const AlarmForm = () => {
-  const setAlarmTime = watcherStore((state) => state.setAlarmTime);
+  const { isActive, isAlarmActive, setAlarmTime, setIsAlarmActive } =
+    watcherStore((state) => state);
   const schema = yup.object().shape({
     time: yup.date().required(),
   });
@@ -29,11 +25,8 @@ export const AlarmForm = () => {
     <form
       autoComplete='off'
       onSubmit={form.onSubmit(({ time }) => {
-        const totalMiliSeconds =
-          getHoursInMiliSeconds(time.getHours()) +
-          getMinutesInMiliSeconds(time.getMinutes()) +
-          getSecondsInMiliSeconds(time.getSeconds());
-        setAlarmTime(totalMiliSeconds);
+        setAlarmTime(time.getTime());
+        setIsAlarmActive(true);
         showNotification({
           disallowClose: true,
           autoClose: 5000,
@@ -62,7 +55,7 @@ export const AlarmForm = () => {
         }}
         {...form.getInputProps('time')}
       />
-      <Button mt={20} type='submit'>
+      <Button mt={20} type='submit' disabled={isAlarmActive || isActive}>
         Set Alarm
       </Button>
     </form>

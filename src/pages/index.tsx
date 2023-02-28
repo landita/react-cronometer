@@ -10,6 +10,8 @@ import { DisplayTime } from '../components/pages/home/DisplayTime';
 import { AlarmForm } from '../components/pages/home';
 import { watcherStore } from '../store';
 import '../styles/border-rainbow.css';
+import Confetti from 'react-confetti';
+import { useWindowSize } from 'react-use';
 
 const HomePage = () => {
   const {
@@ -17,13 +19,22 @@ const HomePage = () => {
     alarmTime,
     alarmInterval,
     isActive,
-    setAlarmInterval,
+    isAlarmActive,
     setTime,
     setInitialTime,
     setIsActive,
+    setAlarmTime,
+    setAlarmInterval,
+    setIsAlarmActive,
   } = watcherStore((state) => state);
-  const watcherRef = useRef(0);
-  const alarmRef = useRef(0);
+
+  const { width, height } = useWindowSize();
+
+  const ref = useRef({
+    timer1: 0,
+    timer2: 0,
+    willAlarmMatch: false,
+  });
 
   const onStart = () => {
     setIsActive(true);
@@ -37,27 +48,40 @@ const HomePage = () => {
   };
 
   useEffect(() => {
-    let { current } = watcherRef;
+    let { timer1 } = ref.current;
     if (isActive) {
-      current = setInterval(() => {
+      timer1 = setInterval(() => {
         setTime(10);
       }, 10);
     } else {
-      clearInterval(current);
+      clearInterval(timer1);
     }
-    return () => clearInterval(current);
+    return () => clearInterval(timer1);
   }, [isActive]);
 
   useEffect(() => {
-    let { current } = alarmRef;
-    current = setInterval(() => {
-      setAlarmInterval(10);
-    }, 10);
-    if (alarmTime === alarmInterval) {
-      console.log('they match', alarmInterval, alarmTime);
+    let { timer2 } = ref.current;
+    if (isAlarmActive) {
+      timer2 = setInterval(() => {
+        setAlarmInterval(10);
+      }, 5);
+      if (alarmTime - alarmInterval <= 10000) {
+        clearInterval(timer2);
+        ref.current.willAlarmMatch = true;
+        setAlarmTime(0);
+        setAlarmInterval(Date.now());
+        timer2 = setInterval(() => {
+          setIsAlarmActive(false);
+        }, 2000);
+        ref.current.willAlarmMatch = false;
+
+        clearInterval(timer2);
+      }
+    } else {
+      clearInterval(timer2);
     }
-    return () => clearInterval(current);
-  }, [alarmTime]);
+    return () => clearInterval(timer2);
+  }, [isAlarmActive, alarmInterval, alarmTime]);
 
   return (
     <Container
@@ -70,6 +94,9 @@ const HomePage = () => {
         alignItems: 'center',
       }}
     >
+      {ref.current.willAlarmMatch && (
+        <Confetti width={width} height={height} tweenDuration={2000} />
+      )}
       <Flex
         direction='column'
         justify='center'
@@ -81,7 +108,11 @@ const HomePage = () => {
         <DisplayTime value={time} />
         <Group mt={30} mb={30}>
           {!isActive && time === 0 && (
-            <Button rightIcon={<TbPlayerPlay />} onClick={onStart}>
+            <Button
+              rightIcon={<TbPlayerPlay />}
+              onClick={onStart}
+              disabled={isAlarmActive}
+            >
               Start
             </Button>
           )}
