@@ -7,8 +7,13 @@ import * as yup from 'yup';
 import { watcherStore } from '../../../store';
 
 export const AlarmForm = () => {
-  const { isActive, isAlarmActive, setAlarmTime, setIsAlarmActive } =
-    watcherStore((state) => state);
+  const {
+    isActive,
+    isAlarmActive,
+    setAlarmTime,
+    setAlarmInterval,
+    setIsAlarmActive,
+  } = watcherStore((state) => state);
   const schema = yup.object().shape({
     time: yup.date().required(),
   });
@@ -20,6 +25,11 @@ export const AlarmForm = () => {
     validateInputOnChange: true,
     validateInputOnBlur: true,
   });
+  const onReset = () => {
+    setAlarmTime(0);
+    setAlarmInterval(Date.now());
+    setIsAlarmActive(false);
+  };
 
   return (
     <form
@@ -57,6 +67,15 @@ export const AlarmForm = () => {
       />
       <Button mt={20} type='submit' disabled={isAlarmActive || isActive}>
         Set Alarm
+      </Button>
+      <Button
+        mt={20}
+        ml={10}
+        type='button'
+        disabled={!isAlarmActive}
+        onClick={onReset}
+      >
+        Stop waiting
       </Button>
     </form>
   );
