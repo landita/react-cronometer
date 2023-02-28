@@ -1,5 +1,5 @@
 {
-  "name": "react-cronometer",
+  "name": "react-stopwatch",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -13,8 +13,20 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@emotion/react": "^11.10.6",
+    "@mantine/core": "^5.10.5",
+    "@mantine/dates": "^5.10.5",
+    "@mantine/form": "^5.10.5",
+    "@mantine/hooks": "^5.10.5",
+    "@mantine/notifications": "^5.10.5",
+    "dayjs": "^1.11.7",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-confetti": "^6.1.0",
+    "react-dom": "^18.2.0",
+    "react-icons": "^4.7.1",
+    "react-use": "^17.4.0",
+    "yup": "^1.0.2",
+    "zustand": "^4.3.4"
   },
   "devDependencies": {
     "@types/react": "^18.0.27",
